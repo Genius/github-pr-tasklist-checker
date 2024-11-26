@@ -16,6 +16,10 @@ on:
       - ready_for_review
 name: "Test"
 
+permissions:
+  checks: write
+  pull-requests: write
+
 jobs:
   does_it_work:
     runs-on: ubuntu-latest

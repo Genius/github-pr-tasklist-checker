@@ -9817,13 +9817,22 @@ const send = async (context, message) => {
     summary: 'https://genius.com/images/extreme.jpg',
   };
 
+  const { data: commits } = await maybeForbidden(
+    octokit.pulls.listCommits,
+    {
+      owner,
+      repo,
+      pull_number
+    },
+  );
+
   await maybeForbidden(
     octokit.rest.checks.create,
     {
       owner,
       repo,
       name: 'PR Validation',
-      head_sha: context.pull_request.commits.at(-1).sha,
+      head_sha: commits.at(-1).sha,
       output,
     },
   );

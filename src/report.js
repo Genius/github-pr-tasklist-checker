@@ -6,36 +6,12 @@
 const { getOctokit, maybeForbidden } = require('./utils');
 
 const send = async (context, message) => {
-  const octokit = getOctokit(context);
-  const {owner, repo} = context.repo;
+  if (message) {
+    console.error(message);
+    return process.exit(1);
+  }
 
-  const output = Boolean(message.length) ? {
-    title: 'Checklist not complete!',
-    summary: message,
-  } : {
-    title: 'Checklist looks good!',
-    summary: 'https://genius.com/images/extreme.jpg',
-  };
-
-  const { data: commits } = await maybeForbidden(
-    octokit.pulls.listCommits,
-    {
-      owner,
-      repo,
-      pull_number
-    },
-  );
-
-  await maybeForbidden(
-    octokit.rest.checks.create,
-    {
-      owner,
-      repo,
-      name: 'PR Validation',
-      head_sha: commits.at(-1).sha,
-      output,
-    },
-  );
+  console.log('https://genius.com/images/extreme.jpg');
 };
 
 module.exports = Object.freeze({

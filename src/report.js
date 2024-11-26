@@ -5,59 +5,29 @@
 
 const { getOctokit, maybeForbidden } = require('./utils');
 
-
-const message_sign = '​  ​​​​​​​​ ​​​​​​​';
-
-
 const send = async (context, message) => {
   const octokit = getOctokit(context);
+  const {owner, repo} = context.repo;
 
-  const comments = (await maybeForbidden(
-    octokit.rest.issues.listComments,
-    {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: context.issue.number,
-    },
-  )).data;
-  const previous_comment = comments.filter(comment => comment.body.endsWith(message_sign))[0];
-
-  if (!message.length) {
-    if (previous_comment) {
-      await maybeForbidden(
-        octokit.rest.issues.deleteComment,
-        {
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          comment_id: previous_comment.id,
-        },
-      );
-    };
-  } else {
-    if (comments.length && previous_comment) {
-      await maybeForbidden(
-        octokit.rest.issues.updateComment,
-        {
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          comment_id: previous_comment.id,
-          body: message.trim() + message_sign,
-        },
-      );
-    } else {
-      await maybeForbidden(
-        octokit.rest.issues.createComment,
-        {
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: context.issue.number,
-          body: message.trim() + message_sign,
-        },
-      );
-    };
+  const output = Boolean(message.length) ? {
+    title: 'Checklist not complete!',
+    summary: message,
+  } : {
+    title: 'Checklist looks good!',
+    summary: 'https://genius.com/images/extreme.jpg',
   };
-};
 
+  await maybeForbidden(
+    octokit.rest.checks.create,
+    {
+      owner,
+      repo,
+      name: 'PR Validation',
+      head_sha: context.pull_request.commits.at(-1).sha,
+      output,
+    },
+  );
+};
 
 module.exports = Object.freeze({
   send,

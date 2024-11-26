@@ -1,0 +1,28 @@
+on:
+  pull_request:
+    branches: [main]
+    # https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#pull_request
+    types:
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - opened
+      - edited
+      - closed
+      - reopened
+      - synchronize
+      - converted_to_draft
+      - ready_for_review
+name: "Test"
+
+jobs:
+  does_it_work:
+    runs-on: ubuntu-latest
+    name: Does it work?
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: The checklist action
+        uses: ./
+        id: task-list-checker
